@@ -3,7 +3,9 @@
 //
 
 #pragma once
+#include<vector>
 
+using namespace std;
 
 class CGDIProbaView : public CView
 {
@@ -22,7 +24,9 @@ public:
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	
+	void CreatePattern(CDC* pDC,int with,int height,int type,int thicnes,COLORREF boja);
+	void PtRectCig(CDC* pDC, int with, int height, int thicknes, COLORREF boja, int count);
+	vector<CPoint> OdrediPoligon(CPoint start, int size, int n);
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
