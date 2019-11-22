@@ -119,6 +119,59 @@ void CGDIProbaView::CreatePattern(CDC* pDC, int with, int height, int type,int t
 	CPen* oldPen = pDC->SelectObject(&olovka);
 
 	
+	pDC->Rectangle(0, 0, with, height);
+
+	CBitmap bit;
+	int tmp = thicnes * 5;
+	bit.CreateBitmap(tmp, tmp, 1, 32, NULL);
+
+	CDC* tmpDC = new CDC();
+	tmpDC->CreateCompatibleDC(NULL);
+
+	CBitmap* oldBmpS = tmpDC->SelectObject(&bit);
+
+	tmpDC->Rectangle(-5, -5, tmp + 5, tmp + 5);
+
+
+
+	CPen cetka(PS_GEOMETRIC, thicnes, boja);
+
+	//centar = { with / 2,height / 2 };
+
+	CPen* oldBrush = tmpDC->SelectObject(&cetka);
+
+	tmpDC->Ellipse(0, 0, tmp, tmp);//
+
+	int size = tmp * tmp;
+
+	BITMAP test;
+	
+	
+	WORD* matricaSrc = (WORD*)calloc(size, sizeof(WORD));
+	WORD* matricaDst = (WORD*)calloc(height * with, sizeof(WORD));
+
+	//BYTE* matricaSrc = (BYTE*)GlobalAlloc(GPTR, size);
+	//BYTE* matricaDst = (BYTE*)GlobalAlloc(GPTR, with*height);
+	bit.GetBitmapBits(size * 4, matricaSrc);
+
+	for (int i = 0; i < with * height; i += size)
+	{
+
+		memcpy(&matricaDst[i], matricaSrc, size);
+	}
+
+	CBitmap nova;
+	int b = nova.CreateBitmap(with, height, 1, 32, NULL);
+	free(matricaSrc);
+	b = nova.SetBitmapBits(with * height * 4, (BYTE*)matricaDst);
+
+	tmpDC->SelectObject(&nova);
+
+	pDC->BitBlt(0, 0, with, height, tmpDC, 0, 0, SRCCOPY);
+
+
+	
+
 
 	/*for (int r = with-thicnes; r > 0; r -= 2 * thicnes)
 	{
@@ -126,10 +179,14 @@ void CGDIProbaView::CreatePattern(CDC* pDC, int with, int height, int type,int t
 	}*/
 
 	//krugovi
-	PtRectCig(pDC, with, height, 30, boja, 4);
+	//PtRectCig(pDC, with, height, 30, boja, 4);
 
 	pDC->SelectObject(oldPen);
 	olovka.DeleteObject();
+	tmpDC->SelectObject(&oldBmpS);
+	tmpDC->SelectObject(oldBrush);///////s
+	tmpDC->DeleteDC();
+	delete tmpDC;
 }
 
 // CGDIProbaView drawing
@@ -358,7 +415,6 @@ void CGDIProbaView::OnDraw(CDC* pDC)
 	CreatePattern(testDC, 400, 1300, 0, 20, RGB(0, 255, 0));
 
 	pDC->BitBlt(0, 0, 400, 1300, testDC, 0, 0, SRCAND);
-
 	DWORD dw = GetLastError();
 
 	
